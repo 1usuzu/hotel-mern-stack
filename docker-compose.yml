@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend 
+    container_name: hotel-backend
+    ports:
+      - "5000:5000" # Map cổng 5000 của container ra cổng 5000 trên máy của bạn
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend:/app
+      - /app/node_modules # Đảm bảo node_modules trong container được sử dụng
+    depends_on:
+      - mongo # Khởi động backend sau khi mongo đã sẵn sàng
+    networks:
+      - hotel-network
+
+  # Định nghĩa service cho MongoDB
+  mongo:
+    image: mongo:latest
+    container_name: hotel-mongodb
+    ports:
+      - "27017:27017" # Map cổng 27017 của DB ra máy thật
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - hotel-network
+
+# Định nghĩa network để các container có thể giao tiếp với nhau
+networks:
+  hotel-network:
+    driver: bridge
+
+# Định nghĩa volume để lưu trữ dữ liệu của DB
+volumes:
+  mongo-data:
+    driver: local
